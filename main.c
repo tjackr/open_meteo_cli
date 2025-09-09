@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "cities.h"
+#include "main.h"
 
 int main(void)
 {
