@@ -3,6 +3,8 @@
 #include <string.h>
 #include <curl/curl.h>
 
+#include "http.h"
+
 /*
  * Resources:
  * https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
@@ -10,11 +12,6 @@
  * https://curl.se/libcurl/c/getinmemory.html
  *
 */
-
-struct memory_chunk {
-  char *addr;  /* Pointer to adress for chunk */
-  size_t size; /* Size of chunk */
-};
 
 /* Mystery daniel@haxx.se callback function */
 size_t write_memory(void *contents, size_t size, size_t nmemb, struct memory_chunk *data) /* What is nmemb? */
@@ -37,12 +34,12 @@ size_t write_memory(void *contents, size_t size, size_t nmemb, struct memory_chu
   return realsize; /* We return the size of the chunk... */
 }
 
-
 char* get_meteo_response(char* url, char* response)
 {
   CURL *curl;
   CURLcode res;
   struct memory_chunk data;
+  char error[CURL_ERROR_SIZE];
 
   data.addr = malloc(1); /* We allocate a memory address to our data struct */
   data.size = 0; /* We will reallocate memory to it in write_memory(), for now 0 data */
@@ -54,28 +51,31 @@ char* get_meteo_response(char* url, char* response)
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&data);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "TempleOSExplorer/1.0 (TempleBot/16.0; HolyCScript) DivineEngine/20231220");
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
 
   printf("Hämtar data från OpenMeteo...\n");
   res = curl_easy_perform(curl);
 
   
-  if (res != CURLE_OK) /* If response code is not ok we return the error response from api */
+  if (res != CURLE_OK) 
   {
+    printf("CURL Error...\n");
     #ifdef DEBUG
     printf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
     #endif
 
-    strncpy(response, curl_easy_strerror(res), 512);
+    /* strncpy(response, curl_easy_strerror(res), 512); */
   }
-  else /* Else we copy our processed chunk memory to our response variable */
+  else
   {
     #ifdef DEBUG
     printf("Response addr:\n%s\n", data.addr);
     printf("Response size:\n%lu\n", (unsigned long)data.size);
     #endif
+    /* strncpy(response, data.addr, 512); */
 
-    strncpy(response, data.addr, 512);
   }
+  strncpy(response, data.addr, 512);
   
   /* We are done, clean up curl and free the data from memory 🐦 */
   curl_easy_cleanup(curl);
@@ -84,3 +84,4 @@ char* get_meteo_response(char* url, char* response)
 
   return response;
 }
+
