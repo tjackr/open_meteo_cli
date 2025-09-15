@@ -3,19 +3,11 @@
 
 typedef struct 
 {
-  char    addr[64];
-  float   lat;
-  float   lon;
+  char    name[64];
+  char    lat[16];
+  char    lon[16];
 
 } city;
-
-typedef struct
-{
-  char    name[32];
-  float   temp;
-  char    unit[10];
-
-} weather;
 
 const char* cities();
 
