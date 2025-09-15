@@ -55,7 +55,6 @@ char* get_meteo_response(char* url, char* response)
 
   printf("Hämtar data från OpenMeteo...\n");
   res = curl_easy_perform(curl);
-
   
   if (res != CURLE_OK) 
   {
@@ -76,7 +75,6 @@ char* get_meteo_response(char* url, char* response)
 
   }
   strncpy(response, data.addr, 512);
-  response[512] = '\0';
   
   /* We are done, clean up curl and free the data from memory 🐦 */
   curl_easy_cleanup(curl);
